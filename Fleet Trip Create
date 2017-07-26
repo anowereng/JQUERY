@@ -1,0 +1,1021 @@
+@using SoftifyFleetManagement.Models.Helpers
+@model SoftifyFleetManagement.Models.FleetTrip
+@{
+    ViewBag.Title = "Create Trip (Agent)";
+    string truckid = Model.TruckId;
+}
+
+<header class="page-header">
+    <h2>Create Trip </h2>
+</header>
+<script src="~/Content/assets/vendor/jquery/jquery.js"></script>
+@*<script src="~/Content/assets/vendor/jquery/jquery.validate.unobtrusive.min.js"></script>*@
+<!--Error messages will be shown here-->
+@Html.Partial("_FlashMessage")
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+<div class="col-md-6 col-md-offset-2">
+    <div class="col-md-12">
+
+        @Html.LabelFor(model => model.TripCategory, "Trip Category ", htmlAttributes: new { @class = "control-label" })
+        @Html.DropDownList("TripCategory", new SelectList(ViewBag.TripCat, "Name", "Name"), new { @class = "form-control populate ", @Required = "required", @onchange = "FillTripType()" })
+        @Html.ValidationMessageFor(model => model.TripCategory, "", new { @class = "text-danger" })
+
+    </div>
+</div>
+
+
+@using (Html.BeginForm("Create", "FleetTrip", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal", id = "FleetTripEntry" }))
+{
+
+    @*@Html.HiddenFor(m=>m.TripCatSelect, new { @class = "form-control _tripCat" })*@
+    <input type="hidden" id="TripCatSelected" name="TripCatSelect" value="Own"/>
+
+    @Html.AntiForgeryToken()
+    <section class="panel">
+        <div class="panel-body plr-xlglg">
+            @{ int j = 1; }
+
+
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            @Html.LabelFor(model => model.dtTrip, "Trip Date ", htmlAttributes: new { @class = "control-label" })
+                            @Html.TextBoxFor(model => model.dtTrip, null, htmlAttributes: new { @class = "form-control input-sm dtStart", @Required = "required", @data_plugin_datepicker = "", @Value = DateTime.Now.ToString("dd-MMM-yyyy") })
+                            @Html.ValidationMessageFor(model => model.TripType, "", new { @class = "text-danger" })
+
+                        </div>
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.TripType, "Trip Type ", htmlAttributes: new { @class = "control-label" })
+                            @Html.DropDownList("TripType", new SelectList(ViewBag.TypeTrip, "Name", "Name"), "---Please Select---", new { @class = "form-control populate _TripTypeOwn", @Required = "required", @data_plugin_selectTwo = "", @onchange = "_FillTripType()" })
+                            @Html.ValidationMessageFor(model => model.TripType, "", new { @class = "text-danger" })
+
+                        </div>
+
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.TruckType, "Truck Type", htmlAttributes: new { @class = "control-label" })
+                            @Html.DropDownList("TruckType", new SelectList(ViewBag.TypesTruck, "Name", "Name"), "---Please Select---", new { @class = "form-control populate", @Required = "required", @data_plugin_selectTwo = "" })
+                            @Html.ValidationMessageFor(model => model.TruckType, "", new { @class = "text-danger" })
+
+
+                        </div>
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.TruckId, "Truck No.", htmlAttributes: new { @class = "control-label TruckIdlbl" })
+                            @Html.HiddenFor(model => model.TruckNo, htmlAttributes: new { @class = "control-label" })
+                            @if (int.Parse(truckid) > 0)
+                            {
+                                @Html.DropDownListFor(model => model.TruckId, new SelectList(ViewBag.Truck, "Id", "Name"), new { @class = "form-control populate TruckIdSelect", @Required = "required", @data_plugin_selectTwo = "" })
+
+                            }
+                            else
+                            {
+                                @Html.DropDownListFor(model => model.TruckId, new SelectList(ViewBag.Truck, "Id", "Name"), "---Please Select---", new { @class = "form-control populate TruckIdSelect", @Required = "required", @data_plugin_selectTwo = "", @onchange = "FillDriverAndHelper()" })
+                                <input type="hidden" id="truckIds" value="" />
+                            }
+                            @Html.ValidationMessageFor(model => model.TruckId, "", new { @class = "text-danger" })
+
+                        </div>
+
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.Duration, "Duration Days", htmlAttributes: new { @class = "control-label " })
+                            @Html.DropDownList("Duration", new SelectList(ViewBag.DurationDays, "Name", "Name"), "---Please Select---", new { @class = "form-control populate", @Required = "required", @data_plugin_selectTwo = "" })
+                            @Html.ValidationMessageFor(model => model.DriverId, "", new { @class = "text-danger" })
+
+
+                        </div>
+
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.DriverId, "Driver Name", htmlAttributes: new { @class = "control-label driverlbl" })
+                            @Html.HiddenFor(model => model.DriverName, htmlAttributes: new { @class = "control-label" })
+                            @Html.DropDownList("DriverId", new SelectList(ViewBag.Driver, "Id", "Name"), "---Please Select---", new { @class = "form-control populate DriverId", @Required = "required", @data_plugin_selectTwo = "", @onchange = "DriverFill()" })
+
+                            @Html.ValidationMessageFor(model => model.DriverId, "", new { @class = "text-danger" })
+
+
+                        </div>
+
+                        <div class="col-md-3">
+                            @Html.LabelFor(model => model.HelperId, "Helper Name", htmlAttributes: new { @class = "control-label hlperlbl" })
+                            @Html.HiddenFor(model => model.HelperName, htmlAttributes: new { @class = "control-label" })
+                            @Html.DropDownList("HelperId", new SelectList(ViewBag.Helper, "Id", "Name"), "---Please Select Helper---", new { @class = "form-control populate HelperId", @Required = "required", @data_plugin_selectTwo = "", @onchange = "HelperFill()" })
+
+                            @Html.ValidationMessageFor(model => model.HelperId, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.DriverPhone, "Driver Phone", htmlAttributes: new { @class = "control-label " })
+                            @Html.EditorFor(model => model.DriverPhone, new { htmlAttributes = new { @class = "form-control H", @placeholder = "", @Required = "required" } })
+                            @Html.ValidationMessageFor(model => model.DriverPhone, "", new { @class = "text-danger" })
+
+                        </div>
+
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.HelperPhone, "Helper Phone", htmlAttributes: new { @class = "control-label " })
+                            @Html.EditorFor(model => model.HelperPhone, new { htmlAttributes = new { @class = "form-control H", @placeholder = "", @Required = "required" } })
+                            @Html.ValidationMessageFor(model => model.HelperPhone, "", new { @class = "text-danger" })
+                        </div>
+
+                    </div> <!-- end : row-->
+
+                </div>
+
+
+
+            </div>
+
+
+            <hr />
+
+            <!-- Raw Materials Start-->
+
+        <div class="row" id="RawMaterialOwn">
+           
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.RawMatRecvSend, "Recv Or Send ", htmlAttributes: new { @class = "control-label" })
+                @Html.DropDownList("RawMatRecvSend", new SelectList(ViewBag.RawMatRecvSendVB, "Name", "Name"), "---Please Select---", new { @class = "form-control populate", @Required = "required", @data_plugin_selectTwo = "" })
+                @Html.ValidationMessageFor(model => model.RawMatRecvSend, "", new { @class = "text-danger" })
+
+            </div>
+            <div class="col-md-3">
+                    @Html.LabelFor(model => model.RawMatLCNo, "LC.No", htmlAttributes: new { @class = "control-label" })
+                    @Html.EditorFor(model => model.RawMatLCNo, new { htmlAttributes = new { @class = "form-control", @placeholder = "", @Required = "required" } })
+                    @Html.ValidationMessageFor(model => model.RawMatLCNo, "", new { @class = "text-danger" })
+
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.RawMatFrom, "From", htmlAttributes: new { @class = "control-label " })
+                    @Html.DropDownList("RawMatFrom", new SelectList(ViewBag.RawMatFromVB, "Name", "Name"), "---Please Select---", new { @class = "form-control populate", @Required = "required", @data_plugin_selectTwo = "" })
+                    @Html.ValidationMessageFor(model => model.RawMatFrom, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.RawMatShip, "Ship", htmlAttributes: new { @class = "control-label " })
+                    @Html.DropDownList("RawMatShip", new SelectList(ViewBag.RawMatShipVB, "Name", "Name"), "---Please Select---", new { @class = "form-control populate", @Required = "required", @data_plugin_selectTwo = "" })
+                    @Html.ValidationMessageFor(model => model.RawMatShip, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.RawMatProduct, "Product", htmlAttributes: new { @class = "control-label " })
+                    @Html.DropDownList("RawMatProduct", new SelectList(ViewBag.RawMatProductVB, "Name", "Name"), "---Please Select---", new { @class = "form-control populate", @Required = "required", @data_plugin_selectTwo = "" })
+                    @Html.ValidationMessageFor(model => model.RawMatProduct, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.RawMatVasel, "Vasel", htmlAttributes: new { @class = "control-label " })
+                    @Html.DropDownList("RawMatVasel", new SelectList(ViewBag.RawMatVaselVB, "Name", "Name"), "---Please Select---", new { @class = "form-control populate", @Required = "required", @data_plugin_selectTwo = "" })
+                    @Html.ValidationMessageFor(model => model.RawMatVasel, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.RawMatArrivalLoc, "Arrival Location", htmlAttributes: new { @class = "control-label " })
+                    @Html.DropDownList("RawMatArrivalLoc", new SelectList(ViewBag.RawMatArrivalLocVB, "Name", "Name"), "---Please Select---", new { @class = "form-control populate", @Required = "required", @data_plugin_selectTwo = "" })
+                    @Html.ValidationMessageFor(model => model.RawMatArrivalLoc, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.LabelFor(model => model.RawMatApxQty, "Apx.Qty", htmlAttributes: new { @class = "control-label" })
+                    @Html.EditorFor(model => model.RawMatApxQty, new { htmlAttributes = new { @class = "form-control", @placeholder = "", @Required = "required" } })
+                    @Html.ValidationMessageFor(model => model.RawMatApxQty, "", new { @class = "text-danger" })
+
+                </div>
+            </div> <!-- Raw Materials Div End -->
+
+
+            <div class="row">
+                <div class="col-md-12" id="locationOwn">
+
+                    <div class="pull-left">
+                        <h3>Location Info</h3>
+                    </div>
+
+                    <div class="pull-right">
+                        <button class="mb-xs mt-xs mr-xs btn btn-primary" type="button" name="btnAddDoc" id="LocationOwn">
+                            Add More <i class="fa fa-plus"></i>
+                        </button>
+
+                    </div>
+
+                    <table class="table table-bordered table-striped table-condensed mb-none">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Unit Type</th>
+                                <th>Prod.Type</th>
+                                <th>Location</th>
+                                <th>DO. No</th>
+                                <th> Qty</th>
+                                <th> Party</th>
+                                <th> Party (Main)</th>
+                                <th> Party (Sub)</th>
+                                <th> Party(Retailer)</th>
+                                <th> Amount</th>
+                                <th>Address</th>
+                                <th>Action</th>
+
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+
+                            @{
+                                int x = 1;
+
+                            }
+
+
+                            <tr class="clonedInputlocOwn" id="entrylocOwn@{@x}">
+
+                                <td class="Sl">1</td>
+                                <td class="col-sm-1">
+                                    @Html.DropDownList("TripLocationinfo[0].UnitType", new SelectList(ViewBag.ProdUnit, "Name", "Name"), "--Select--", new { @class = "form-control populate unitType", @Required = "required" })
+
+                                </td>
+                                <td class="col-sm-1">
+                                    @Html.DropDownList("TripLocationinfo[0].ProductType", new SelectList(ViewBag.ProductType, "Name", "Name"), "--Select--", new { @class = "form-control populate prdtype", @Required = "required" })
+
+                                </td>
+                                <td class="col-sm-1">
+                                    @Html.DropDownList("TripLocationinfo[0].LocationId", new SelectList(ViewBag.Location, "Id", "Name"), "--Select--", new { @class = "form-control populate location", @Required = "required", @onchange = "FillRate('entryloc1')" })
+                                </td>
+
+                                <td class="hide">
+                                    <input type="hidden" class="rate" value="" />
+                                </td>
+
+                                <td>
+                                    @Html.TextBox("TripLocationinfo[0].DONO", null, htmlAttributes: new { @class = "form-control input-sm doNo", @Required = "required" })
+                                </td>
+                                <td class="col-sm-1">
+                                    @Html.TextBox("TripLocationinfo[0].Qty", null, htmlAttributes: new { @class = "form-control input-sm qty", @Required = "required" })
+                                </td>
+                                <td>
+                                    @Html.TextBox("TripLocationinfo[0].PartyName", null, htmlAttributes: new { @class = "form-control input-sm partyName", @Required = "required" })
+                                </td>
+                                <td>
+                                    @Html.DropDownList("TripLocationinfo[0].PartyTypeMain", new SelectList(ViewBag.PartyTypeCat, "Name", "Name"), "--Select--", new { @class = "form-control populate partyTypeMain", @Required = "required", @id = "_partyTypeMainEntry" })
+                                </td>
+                                <td>
+                                    @Html.DropDownList("TripLocationinfo[0].PartyTypeSub", new SelectList(ViewBag.PartyTypeSub, "Name", "Name"), "--Select--", new { @class = "form-control populate partyTypeSub", @Required = "required" ,@id= "_partyTypeSubEntry" })
+                                </td>
+                                    <td>
+                                        @Html.TextBox("TripLocationinfo[0].RetailerName", null, htmlAttributes: new { @class = "form-control input-sm retailerName", @Required = "required", @id = "_retailerNameEntry" })
+                                </td>
+                                <td class="col-sm-1">
+                                    @Html.TextBox("TripLocationinfo[0].Amount", null, htmlAttributes: new { @class = "form-control input-sm amount", @Required = "required" })
+                                </td>
+                                <td>
+                                    @Html.TextBox("TripLocationinfo[0].Address", null, htmlAttributes: new { @class = "form-control input-sm address", @Required = "required" })
+                                </td>
+                                <td class="text-center"><a href="javascript:void(0)" class="btnDelLocOwn" style="cursor: pointer;"><i class="fa fa-times tip pointer"></i></a></td>
+
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+        <footer class="panel-footer">
+            <div class="row">
+                <div class="col-sm-9 col-sm-offset-4">
+                    <a href="@Url.Action(" Index", "FleetTrip" )" class="btn btn-primary">
+                        <i class="fa fa-arrow-circle-left"></i> Back to list
+                    </a>
+                    <button class="btn btn-success btn-wide" type="submit" name="btnSubmit" id="FleetTruckSave">
+                        Submit <i class="fa fa-arrow-circle-right"></i>
+                    </button>
+                </div>
+            </div>
+        </footer>
+
+
+    </section>
+
+    }
+
+
+
+
+@using (Html.BeginForm("Create", "FleetTrip", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal", id = "FleetTripEntryHire" }))
+{
+
+
+
+    @*@Html.HiddenFor(m => m.TripCatSelect, new { @class = "form-control _tripCat" })*@
+    <input type="hidden" id="TripCatSelected1" name="TripCatSelect" value="Hire" />
+    @Html.AntiForgeryToken()
+
+    <section class="panel">
+
+
+        <div class="panel-body plr-xlglg">
+            @{ int j = 1; }
+
+     
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="row">
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.dtTrip, "Trip Date ", htmlAttributes: new { @class = "control-label" })
+                            @Html.TextBoxFor(model => model.dtTrip, null, htmlAttributes: new { @class = "form-control input-sm dtStart", @Required = "required", @Value = DateTime.Now.ToString("dd-MMM-yyyy".ToString()) })
+                            @Html.ValidationMessageFor(model => model.dtTrip, "", new { @class = "text-danger" })
+
+                        </div>
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.TripType, "Trip Type ", htmlAttributes: new { @class = "control-label" })
+                            @Html.DropDownList("TripType", new SelectList(ViewBag.TypeTrip, "Name", "Name"), "---Please Select---", new { @class = "form-control populate _TripTypeHire", @Required = "required", @data_plugin_selectTwo = "", @onchange = "_FillTripType()" })
+                            @Html.ValidationMessageFor(model => model.TripType, "", new { @class = "text-danger" })
+
+                        </div>
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.AgentId, "Agent Name ", htmlAttributes: new { @class = "control-label" })
+                            @Html.DropDownList("AgentId", new SelectList(ViewBag.Agency, "Id", "Name"), "---Please Select---", new { @class = "form-control populate", @Required = "required", @data_plugin_selectTwo = "" })
+                            @Html.ValidationMessageFor(model => model.AgentId, "", new { @class = "text-danger" })
+
+                        </div>
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.TruckType, "Truck Type", htmlAttributes: new { @class = "control-label" })
+                            @Html.DropDownList("TruckType", new SelectList(ViewBag.TypesTruck, "Name", "Name"), "---Please Select---", new { @class = "form-control populate", @Required = "required", @data_plugin_selectTwo = "" })
+                            @Html.ValidationMessageFor(model => model.TruckType, "", new { @class = "text-danger" })
+
+
+                        </div>
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.TruckNo, "Truck No.", htmlAttributes: new { @class = "control-label TruckIdlbl" })
+                            @Html.EditorFor(model => model.TruckNo, new { htmlAttributes = new { @class = "form-control", @placeholder = "", @Required = "required" } })
+                            @Html.ValidationMessageFor(model => model.TruckNo, "", new { @class = "text-danger" })
+
+                        </div>
+
+                        <div class="col-md-3">
+                            @Html.LabelFor(model => model.Duration, "Duration Days", htmlAttributes: new { @class = "control-label " })
+                            @Html.DropDownList("Duration", new SelectList(ViewBag.DurationDays, "Name", "Name"), "---Please Select---", new { @class = "form-control populate", @Required = "required", @data_plugin_selectTwo = "" })
+                            @Html.ValidationMessageFor(model => model.Duration, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="col-md-3">
+                            @Html.LabelFor(model => model.DriverName, "Driver Name", htmlAttributes: new { @class = "control-label driverlbl" })
+                            @Html.EditorFor(model => model.DriverName, new { htmlAttributes = new { @class = "form-control", @placeholder = "", @Required = "required" } })
+                            @Html.ValidationMessageFor(model => model.DriverName, "", new { @class = "text-danger" })
+                        </div>
+
+
+                        @*---*@
+                        <div class="col-md-3">
+                            @Html.LabelFor(model => model.HelperName, "Helper Name", htmlAttributes: new { @class = "control-label hlperlbl" })
+                            @Html.EditorFor(model => model.HelperName, new { htmlAttributes = new { @class = "form-control", @placeholder = "", @Required = "required" } })
+                            @Html.ValidationMessageFor(model => model.HelperName, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.DriverPhone, "Driver Phone", htmlAttributes: new { @class = "control-label " })
+                            @Html.EditorFor(model => model.DriverPhone, new { htmlAttributes = new { @class = "form-control", @placeholder = "", @Required = "required" } })
+                            @Html.ValidationMessageFor(model => model.DriverPhone, "", new { @class = "text-danger" })
+
+                        </div>
+
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.HelperPhone, "Helper Phone", htmlAttributes: new { @class = "control-label " })
+                            @Html.EditorFor(model => model.HelperPhone, new { htmlAttributes = new { @class = "form-control", @placeholder = "", @Required = "required" } })
+                            @Html.ValidationMessageFor(model => model.HelperPhone, "", new { @class = "text-danger" })
+                        </div>
+                    </div> <!-- end : row-->
+
+                </div>
+            </div>
+            <hr />
+            
+            <!-- Raw Materials Start-->
+
+        <div class="row" id="RawMaterialHire">
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.RawMatRecvSend, "Recv Or Send ", htmlAttributes: new { @class = "control-label" })
+                @Html.DropDownList("RawMatRecvSend", new SelectList(ViewBag.RawMatRecvSendVB, "Name", "Name"), "---Please Select---", new { @class = "form-control populate", @Required = "required", @data_plugin_selectTwo = "" })
+                @Html.ValidationMessageFor(model => model.RawMatRecvSend, "", new { @class = "text-danger" })
+
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.RawMatLCNo, "LC.No", htmlAttributes: new {@class = "control-label"})
+                @Html.EditorFor(model => model.RawMatLCNo, new {htmlAttributes = new {@class = "form-control", @placeholder = "", @Required = "required"}})
+                @Html.ValidationMessageFor(model => model.RawMatLCNo, "", new {@class = "text-danger"})
+
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.RawMatFrom, "From", htmlAttributes: new {@class = "control-label "})
+                @Html.DropDownList("RawMatFrom", new SelectList(ViewBag.RawMatFromVB, "Name", "Name"), "---Please Select---", new {@class = "form-control populate", @Required = "required", @data_plugin_selectTwo = ""})
+                @Html.ValidationMessageFor(model => model.RawMatFrom, "", new {@class = "text-danger"})
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.RawMatShip, "Ship", htmlAttributes: new {@class = "control-label "})
+                @Html.DropDownList("RawMatShip", new SelectList(ViewBag.RawMatShipVB, "Name", "Name"), "---Please Select---", new {@class = "form-control populate", @Required = "required", @data_plugin_selectTwo = ""})
+                @Html.ValidationMessageFor(model => model.RawMatShip, "", new {@class = "text-danger"})
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.RawMatProduct, "Product", htmlAttributes: new {@class = "control-label "})
+                @Html.DropDownList("RawMatProduct", new SelectList(ViewBag.RawMatProductVB, "Name", "Name"), "---Please Select---", new {@class = "form-control populate", @Required = "required", @data_plugin_selectTwo = ""})
+                @Html.ValidationMessageFor(model => model.RawMatProduct, "", new {@class = "text-danger"})
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.RawMatVasel, "Vasel", htmlAttributes: new {@class = "control-label "})
+                @Html.DropDownList("RawMatVasel", new SelectList(ViewBag.RawMatVaselVB, "Name", "Name"), "---Please Select---", new {@class = "form-control populate", @Required = "required", @data_plugin_selectTwo = ""})
+                @Html.ValidationMessageFor(model => model.RawMatVasel, "", new {@class = "text-danger"})
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.RawMatArrivalLoc, "Arrival Location", htmlAttributes: new {@class = "control-label "})
+                @Html.DropDownList("RawMatArrivalLoc", new SelectList(ViewBag.RawMatArrivalLocVB, "Name", "Name"), "---Please Select---", new {@class = "form-control populate", @Required = "required", @data_plugin_selectTwo = ""})
+                @Html.ValidationMessageFor(model => model.RawMatArrivalLoc, "", new {@class = "text-danger"})
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.RawMatApxQty, "Apx.Qty", htmlAttributes: new {@class = "control-label"})
+                @Html.EditorFor(model => model.RawMatApxQty, new {htmlAttributes = new {@class = "form-control", @placeholder = "", @Required = "required"}})
+                @Html.ValidationMessageFor(model => model.RawMatApxQty, "", new {@class = "text-danger"})
+
+            </div>
+        </div> <!-- Raw Materials Div End -->
+
+            <div class="row">
+                <div class="col-md-12" id="locationHire">
+
+                    <div class="pull-left">
+                        <h3>Location Info</h3>
+                    </div>
+
+                    <div class="pull-right">
+                        <button class="mb-xs mt-xs mr-xs btn btn-primary" type="button" name="btnAddDoc" id="LocationHire">
+                            Add More <i class="fa fa-plus"></i>
+                        </button>
+
+                    </div>
+
+                    <table class="table table-bordered table-striped table-condensed mb-none">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Unit Type</th>
+                                <th>Prod.Type</th>
+                                <th>Location</th>
+                                <th>DO. No</th>
+                                <th> Qty</th>
+                                <th> Party</th>
+                                <th> Party (Main)</th>
+                                <th> Party (Sub)</th>
+                                <th> Party(Retailer)</th>
+                                <th> Amount</th>
+                                <th>Address</th>
+                                <th>Action</th>
+
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+
+                            @{
+                                int x = 1;
+
+                            }
+
+
+                            <tr class="clonedInputlocHire" id="entrylocHire@{@x}">
+
+                                <td class="Sl">1</td>
+                                <td class="col-sm-1">
+                                    @Html.DropDownList("TripLocationinfo[0].UnitType", new SelectList(ViewBag.ProdUnit, "Name", "Name"), "--Select--", new { @class = "form-control populate unitType", @Required = "required" })
+
+                                </td>
+                                <td class="col-sm-1">
+
+                                    @Html.DropDownList("TripLocationinfo[0].ProductType", new SelectList(ViewBag.ProductType, "Name", "Name"), "--Select--", new { @class = "form-control populate prdtype", @Required = "required" })
+
+                                </td>
+                                <td class="col-sm-1">
+                                    @Html.DropDownList("TripLocationinfo[0].LocationId", new SelectList(ViewBag.Location, "Id", "Name"), "--Select--", new { @class = "form-control populate location", @Required = "required", @onchange = "FillRate('entryloc1')" })
+                                </td>
+
+                                <td class="hide">
+                                    <input type="hidden" class="rate" value="" />
+                                </td>
+
+                                <td>
+                                    @Html.TextBox("TripLocationinfo[0].DONO", null, htmlAttributes: new { @class = "form-control input-sm doNo", @Required = "required" })
+                                </td>
+                                <td class="col-sm-1">
+                                    @Html.TextBox("TripLocationinfo[0].Qty", null, htmlAttributes: new { @class = "form-control input-sm qty", @Required = "required" })
+                                </td>
+                                <td>
+                                    @Html.TextBox("TripLocationinfo[0].PartyName", null, htmlAttributes: new { @class = "form-control input-sm partyName", @Required = "required" })
+                                </td>
+                                <td>
+                                    @Html.DropDownList("TripLocationinfo[0].PartyTypeMain", new SelectList(ViewBag.PartyTypeCat, "Name", "Name"), "--Select--", new { @class = "form-control populate partyTypeMain", @Required = "required" })
+                                </td>
+                                <td>
+                                    @Html.DropDownList("TripLocationinfo[0].PartyTypeSub", new SelectList(ViewBag.PartyTypeSub, "Name", "Name"), "--Select--", new { @class = "form-control populate partyTypeSub", @Required = "required" })
+                                </td>
+
+                                <td>
+                                    @Html.TextBox("TripLocationinfo[0].RetailerName", null, htmlAttributes: new { @class = "form-control input-sm retailerName", @Required = "required" })
+                                </td>
+                                <td class="col-sm-1">
+                                    @Html.TextBox("TripLocationinfo[0].Amount", null, htmlAttributes: new { @class = "form-control input-sm amount", @Required = "required" })
+                                </td>
+                                <td>
+                                    @Html.TextBox("TripLocationinfo[0].Address", null, htmlAttributes: new { @class = "form-control input-sm address", @Required = "required" })
+                                <td class="text-center"><a href="javascript:void(0)" class="btnDelLocHire" style="cursor: pointer;"><i class="fa fa-times tip pointer"></i></a></td>
+
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+
+        </div>
+        <footer class="panel-footer">
+            <div class="row">
+                <div class="col-sm-9 col-sm-offset-4">
+                    <a href="@Url.Action("Index", "FleetTrip")" class="btn btn-primary">
+                        <i class="fa fa-arrow-circle-left"></i> Back to list
+                    </a>
+                    <button class="btn btn-success btn-wide" type="submit" name="btnSubmit" id="FleetTruckSave">
+                        Submit <i class="fa fa-arrow-circle-right"></i>
+                    </button>
+                </div>
+            </div>
+        </footer>
+    </section>
+
+    }
+
+
+@using (Html.BeginForm("Create", "FleetTrip", FormMethod.Post, new { enctype = "multipart/form-data", @class = "form-horizontal", id = "FleetTripEntryParty" }))
+{
+
+    @Html.AntiForgeryToken()
+
+    @*@Html.HiddenFor(m => m.TripCatSelect, new { @class = "form-control _tripCat" })*@
+    <input type="hidden" id="TripCatSelect" name="TripCatSelect" value="Party" />
+    <section class="panel">
+
+
+        <div class="panel-body plr-xlglg">
+            @{ int j = 1; }
+
+
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="row">
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.dtTrip, "Trip Date ", htmlAttributes: new { @class = "control-label" })
+                            @Html.TextBoxFor(model => model.dtTrip, null, htmlAttributes: new { @class = "form-control input-sm dtStart", @Required = "required", @data_plugin_datepicker = "", @Value = DateTime.Now.ToString("dd-MMM-yyyy".ToString()) })
+                            @Html.ValidationMessageFor(model => model.TripType, "", new { @class = "text-danger" })
+
+                        </div>
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.TripType, "Trip Type ", htmlAttributes: new { @class = "control-label" })
+                            @Html.DropDownList("TripType", new SelectList(ViewBag.TypeTrip, "Name", "Name"), "---Please Select---", new { @class = "form-control populate _TripTypeParty", @Required = "required", @data_plugin_selectTwo = "", @onchange = "_FillTripType()" })
+                            @Html.ValidationMessageFor(model => model.TripType, "", new { @class = "text-danger" })
+
+                        </div>
+
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.TruckType, "Truck Type", htmlAttributes: new { @class = "control-label" })
+                            @Html.DropDownList("TruckType", new SelectList(ViewBag.TypesTruck, "Name", "Name"), "---Please Select---", new { @class = "form-control populate", @Required = "required", @data_plugin_selectTwo = "" })
+                            @Html.ValidationMessageFor(model => model.TruckType, "", new { @class = "text-danger" })
+
+
+                        </div>
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.TruckNo, "Truck No.", htmlAttributes: new { @class = "control-label TruckIdlbl" })
+                            @Html.EditorFor(model => model.TruckNo, new { htmlAttributes = new { @class = "form-control", @placeholder = "", @Required = "required" } })
+                            @Html.ValidationMessageFor(model => model.TruckNo, "", new { @class = "text-danger" })
+
+                        </div>
+
+                        <div class="col-md-3">
+                            @Html.LabelFor(model => model.Duration, "Duration Days", htmlAttributes: new { @class = "control-label " })
+                            @Html.DropDownList("Duration", new SelectList(ViewBag.DurationDays, "Name", "Name"), "---Please Select---", new { @class = "form-control populate", @Required = "required", @data_plugin_selectTwo = "" })
+                            @Html.ValidationMessageFor(model => model.Duration, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="col-md-3">
+                            @Html.LabelFor(model => model.DriverName, "Driver Name", htmlAttributes: new { @class = "control-label driverlbl" })
+                            @Html.EditorFor(model => model.DriverName, new { htmlAttributes = new { @class = "form-control", @placeholder = "", @Required = "required" } })
+                            @Html.ValidationMessageFor(model => model.DriverName, "", new { @class = "text-danger" })
+                        </div>
+
+
+                        @*---*@
+                        <div class="col-md-3">
+                            @Html.LabelFor(model => model.HelperName, "Helper Name", htmlAttributes: new { @class = "control-label hlperlbl" })
+                            @Html.EditorFor(model => model.HelperName, new { htmlAttributes = new { @class = "form-control", @placeholder = "", @Required = "required" } })
+                            @Html.ValidationMessageFor(model => model.HelperName, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.DriverPhone, "Driver Phone", htmlAttributes: new { @class = "control-label " })
+                            @Html.EditorFor(model => model.DriverPhone, new { htmlAttributes = new { @class = "form-control", @placeholder = "", @Required = "required" } })
+                            @Html.ValidationMessageFor(model => model.DriverPhone, "", new { @class = "text-danger" })
+
+                        </div>
+
+                        <div class="col-md-3">
+
+                            @Html.LabelFor(model => model.HelperPhone, "Helper Phone", htmlAttributes: new { @class = "control-label " })
+                            @Html.EditorFor(model => model.HelperPhone, new { htmlAttributes = new { @class = "form-control", @placeholder = "", @Required = "required" } })
+                            @Html.ValidationMessageFor(model => model.HelperPhone, "", new { @class = "text-danger" })
+                        </div>
+                    </div> <!-- end : row-->
+
+                </div>
+            </div>
+            <hr />
+            <!-- Raw Materials Start-->
+
+        <div class="row" id="RawMaterialParty">
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.RawMatRecvSend, "Recv Or Send ", htmlAttributes: new { @class = "control-label" })
+                @Html.DropDownList("RawMatRecvSend", new SelectList(ViewBag.RawMatRecvSendVB, "Name", "Name"), "---Please Select---", new { @class = "form-control populate", @Required = "required", @data_plugin_selectTwo = "" })
+                @Html.ValidationMessageFor(model => model.RawMatRecvSend, "", new { @class = "text-danger" })
+
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.RawMatLCNo, "LC.No", htmlAttributes: new {@class = "control-label"})
+                @Html.EditorFor(model => model.RawMatLCNo, new {htmlAttributes = new {@class = "form-control", @placeholder = "", @Required = "required"}})
+                @Html.ValidationMessageFor(model => model.RawMatLCNo, "", new {@class = "text-danger"})
+
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.RawMatFrom, "From", htmlAttributes: new {@class = "control-label "})
+                @Html.DropDownList("RawMatFrom", new SelectList(ViewBag.RawMatFromVB, "Name", "Name"), "---Please Select---", new {@class = "form-control populate", @Required = "required", @data_plugin_selectTwo = ""})
+                @Html.ValidationMessageFor(model => model.RawMatFrom, "", new {@class = "text-danger"})
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.RawMatShip, "Ship", htmlAttributes: new {@class = "control-label "})
+                @Html.DropDownList("RawMatShip", new SelectList(ViewBag.RawMatShipVB, "Name", "Name"), "---Please Select---", new {@class = "form-control populate", @Required = "required", @data_plugin_selectTwo = ""})
+                @Html.ValidationMessageFor(model => model.RawMatShip, "", new {@class = "text-danger"})
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.RawMatProduct, "Product", htmlAttributes: new {@class = "control-label "})
+                @Html.DropDownList("RawMatProduct", new SelectList(ViewBag.RawMatProductVB, "Name", "Name"), "---Please Select---", new {@class = "form-control populate", @Required = "required", @data_plugin_selectTwo = ""})
+                @Html.ValidationMessageFor(model => model.RawMatProduct, "", new {@class = "text-danger"})
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.RawMatVasel, "Vasel", htmlAttributes: new {@class = "control-label "})
+                @Html.DropDownList("RawMatVasel", new SelectList(ViewBag.RawMatVaselVB, "Name", "Name"), "---Please Select---", new {@class = "form-control populate", @Required = "required", @data_plugin_selectTwo = ""})
+                @Html.ValidationMessageFor(model => model.RawMatVasel, "", new {@class = "text-danger"})
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.RawMatArrivalLoc, "Arrival Location", htmlAttributes: new {@class = "control-label "})
+                @Html.DropDownList("RawMatArrivalLoc", new SelectList(ViewBag.RawMatArrivalLocVB, "Name", "Name"), "---Please Select---", new {@class = "form-control populate", @Required = "required", @data_plugin_selectTwo = ""})
+                @Html.ValidationMessageFor(model => model.RawMatArrivalLoc, "", new {@class = "text-danger"})
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.RawMatApxQty, "Apx.Qty", htmlAttributes: new {@class = "control-label"})
+                @Html.EditorFor(model => model.RawMatApxQty, new {htmlAttributes = new {@class = "form-control", @placeholder = "", @Required = "required"}})
+                @Html.ValidationMessageFor(model => model.RawMatApxQty, "", new {@class = "text-danger"})
+
+            </div>
+        </div> <!-- Raw Materials Div End -->
+
+            <div class="row">
+                <div class="col-md-12" id="locationParty">
+
+                    <div class="pull-left">
+                        <h3>Location Info</h3>
+                    </div>
+
+                    <div class="pull-right">
+                        <button class="mb-xs mt-xs mr-xs btn btn-primary" type="button" name="btnAddDoc" id="LocationParty">
+                            Add More <i class="fa fa-plus"></i>
+                        </button>
+
+                    </div>
+
+                    <table class="table table-bordered table-striped table-condensed mb-none">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Unit Type</th>
+                                <th>Prod.Type</th>
+                                <th>Location</th>
+                                <th>DO. No</th>
+                                <th> Qty</th>
+                                <th> Party</th>
+                                <th> Party (Main)</th>
+                                <th> Party (Sub)</th>
+                                <th> Party(Retailer)</th>
+                                <th> Amount</th>
+                                <th>Address</th>
+                                <th>Action</th>
+
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+
+                            @{
+                                int x = 1;
+
+                            }
+
+
+                            <tr class="clonedInputlocParty" id="entrylocParty@{@x}">
+
+                                                                                   <td class="Sl">1</td>
+                                <td class="col-sm-1">
+                                    @Html.DropDownList("TripLocationinfo[0].UnitType", new SelectList(ViewBag.ProdUnit, "Name", "Name"), "--Select--", new { @class = "form-control populate unitType", @Required = "required" })
+
+                                </td>
+                                <td class="col-sm-1">
+                                    @Html.DropDownList("TripLocationinfo[0].ProductType", new SelectList(ViewBag.ProductType, "Name", "Name"), "--Select--", new { @class = "form-control populate prdtype", @Required = "required" })
+
+                                </td>
+                                <td class="col-sm-1">
+                                    @Html.DropDownList("TripLocationinfo[0].LocationId", new SelectList(ViewBag.Location, "Id", "Name"), "--Select--", new { @class = "form-control populate location", @Required = "required", @onchange = "FillRate('entryloc1')" })
+                                </td>
+
+                                <td class="hide">
+                                    <input type="hidden" class="rate" value="" />
+                                </td>
+
+                                <td>
+                                    @Html.TextBox("TripLocationinfo[0].DONO", null, htmlAttributes: new { @class = "form-control input-sm doNo", @Required = "required" })
+                                </td>
+                                <td class="col-sm-1">
+                                    @Html.TextBox("TripLocationinfo[0].Qty", null, htmlAttributes: new { @class = "form-control input-sm qty", @Required = "required" })
+                                </td>
+                                <td>
+                                    @Html.TextBox("TripLocationinfo[0].PartyName", null, htmlAttributes: new { @class = "form-control input-sm partyName", @Required = "required" })
+                                </td>
+                                <td>
+                                        @Html.DropDownList("TripLocationinfo[0].PartyTypeMain", new SelectList(ViewBag.PartyTypeCat, "Name", "Name"), "--Select--", new { @class = "form-control populate partyTypeMain", @Required = "required" })
+                                    </td>
+                                                                                   <td>
+                                                                                       @Html.DropDownList("TripLocationinfo[0].PartyTypeSub", new SelectList(ViewBag.PartyTypeSub, "Name", "Name"), "--Select--", new { @class = "form-control populate partyTypeSub", @Required = "required" })
+                                                                                   </td>
+                                <td>
+                                    @Html.TextBox("TripLocationinfo[0].RetailerName", null, htmlAttributes: new { @class = "form-control input-sm retailerName", @Required = "required" })
+                                </td>
+                                <td class="col-sm-1">
+                                    @Html.TextBox("TripLocationinfo[0].Amount", null, htmlAttributes: new { @class = "form-control input-sm amount", @Required = "required" })
+                                </td>
+                                <td>
+                                    @Html.TextBox("TripLocationinfo[0].Address", null, htmlAttributes: new { @class = "form-control input-sm address", @Required = "required" })
+                                <td class="text-center"><a href="javascript:void(0)" class="btnDelLocHire" style="cursor: pointer;"><i class="fa fa-times tip pointer"></i></a></td>
+
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+
+        </div>
+        <footer class="panel-footer">
+            <div class="row">
+                <div class="col-sm-9 col-sm-offset-4">
+                    <a href="@Url.Action("Index", "FleetTrip")" class="btn btn-primary">
+                        <i class="fa fa-arrow-circle-left"></i> Back to list
+                    </a>
+                    <button class="btn btn-success btn-wide" type="submit" name="btnSubmit" id="FleetTruckSave">
+                        Submit <i class="fa fa-arrow-circle-right"></i>
+                    </button>
+                </div>
+            </div>
+        </footer>
+    </section>
+
+    }
+
+
+
+
+<script>
+
+    $("#FleetTripEntryHire").hide();
+    $("#FleetTripEntryParty").hide();
+    $("#RawMaterialOwn").hide();
+    $("#RawMaterialHire").hide();
+    $("#RawMaterialParty").hide();
+    $("#FleetTripEntry").show();
+  
+
+    function _FillTripType() {
+        var tripTypeOwn = $("._TripTypeOwn option:selected").text();
+        var tripTypeHire = $("._TripTypeHire option:selected").text();
+        var tripTypeParty = $("._TripTypeParty option:selected").text();
+
+       
+       // var tripType = $("_TripType option:selected").text();
+        if (tripTypeOwn == 'Raw Materials') {
+           // alert(tripTypeOwn);
+            $("#RawMaterialOwn").show();
+            $("#locationOwn").hide();
+           
+        }
+        else {
+            $("#RawMaterialOwn").hide();
+            $("#locationOwn").show();
+        }
+         if (tripTypeHire == 'Raw Materials') {
+           // alert(tripTypeHire);
+            $("#RawMaterialHire").show();
+            $("#locationHire").hide();
+        } else {
+            $("#RawMaterialHire").hide();
+            $("#locationHire").show();
+        }
+         if (tripTypeParty == 'Raw Materials') {
+            //alert(tripTypeParty);
+            $("#RawMaterialParty").show();
+            $("#locationParty").hide();
+         }
+         else {
+             $("#RawMaterialParty").hide();
+             $("#locationParty").show();
+         }
+        
+    }
+
+
+    function FillTripType() {
+
+        var tType = $("#TripCategory option:selected").text();
+        if (tType == 'Own') {
+         
+            $("#FleetTripEntry").show();
+            $("#FleetTripEntryHire").hide();
+            $("#FleetTripEntryParty").hide();
+
+
+            //$("#TripCatSelected").val(tType);
+        }
+        if (tType == 'Hire') {
+       
+            $("#FleetTripEntry").hide();
+            $("#FleetTripEntryParty").hide();
+            $("#FleetTripEntryHire").show();
+
+          
+        }
+        if (tType == 'Party') {
+        
+            $("#FleetTripEntry").hide();
+            $("#FleetTripEntryHire").hide();
+            $("#FleetTripEntryParty").show();
+
+        }
+     
+    }
+
+
+    function FillDriverAndHelper() {
+        //debugger;
+        var TruckId = $('#TruckId').val();
+        console.log("Id =  " + TruckId);
+        $('#TruckNo').val($(".TruckIdSelect option:selected").text());
+        //alert(a);
+        if (TruckId == 0 || TruckId == '' || TruckId == 'undefined') {
+            alert("Please Select Truck No. First...");
+        }
+
+        else {
+
+            $.ajax
+            ({
+                url: "@Url.Action("GetDriverHelperInfoList", "FleetTrip")",
+                type: 'POST',
+                datatype: 'application/json',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    TruckId: +TruckId
+                }),
+                success: function (result) {
+                    $.each($.parseJSON(result), function (i, sub) {
+
+                        $("#DriverPhone").val(sub.DriverMobile);
+                        $("#HelperPhone").val(sub.HelperMobile);
+                        $("#DriverId").val(sub.DriverId).change();
+                        $("#HelperId").val(sub.HelperId).change();
+                        $("#HelperName").val(sub.HelperName);
+                        $("#DriverName").val(sub.DriverName);
+                    });
+                }
+
+
+
+            });
+
+        }
+
+    }
+
+    function DriverFill() {
+        var driverId = $('#DriverId').val();
+
+        $.ajax
+     ({
+         url: "@Url.Action("GetDriverPhone", "FleetTrip")",
+         type: 'POST',
+         datatype: 'application/json',
+         contentType: 'application/json',
+         data: JSON.stringify({
+             driverId: +driverId
+         }),
+         success: function (result) {
+             $.each($.parseJSON(result),
+                 function (i, sub) {
+                     $("#DriverPhone").val(sub.DriverMobile);
+                     $("#DriverName").val(sub.DriverName);
+                 });
+         }
+
+     });
+
+    }
+
+    function HelperFill() {
+        var helperId = $('#HelperId').val();
+        $.ajax
+     ({
+         url: "@Url.Action("GetHelperPhone", "FleetTrip")",
+            type: 'POST',
+            datatype: 'application/json',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                helperId: +helperId
+            }),
+            success: function(result) {
+                $.each($.parseJSON(result),
+                    function(i, sub) {
+                        $("#HelperPhone").val(sub.HelperMobile);
+                        $("#HelperName").val(sub.HelperName);
+                    });
+            }
+
+        });
+
+    }
+
+    $(function() {
+        $('#FleetTripEntry').validate().settings.ignore = 'div:hidden *';
+        $('#FleetTripEntryParty').validate().settings.ignore = 'div:hidden *';
+        $('#FleetTripEntryHire').validate().settings.ignore = 'div:hidden *';
+    });
+
+
+  
+    $(document).on('change', '.partyTypeMain',
+        function() {
+            var value = $(this).closest('.partyTypeMain').val();
+            if (value == 'Customer') {
+                $(this).closest('tr').find('.partyTypeSub, .retailerName').prop('disabled', true);
+            } else {
+                $(this).closest('tr').find('.partyTypeSub, .retailerName').prop('disabled', false);
+            }
+
+        });
+
+
+    $(document).on('change', '.partyTypeSub',
+        function () {
+            var valueSub = $(this).closest('.partyTypeSub').val();
+            if (valueSub == 'Customer') {
+                $(this).closest('tr').find('.retailerName').prop('disabled', true);
+
+            } else {
+
+                $(this).closest('tr').find('.retailerName').prop('disabled', false);
+            }
+            //alert(1);
+        });
+
+
+  
+</script>
