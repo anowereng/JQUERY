@@ -1,0 +1,6 @@
+var txtid = "#" + '@ViewBag.ControlTxtId';
+        var renderpart = "." + '@ViewBag.ControlTxtId';
+        var selectlinkvalueid = ".Get" + '@ViewBag.ProcId';
+        
+        
+        https://www.codeproject.com/Articles/487501/Create-Multiple-Column-Autocomplete-Combobox-in-AS
