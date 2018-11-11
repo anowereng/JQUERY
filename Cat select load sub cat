@@ -1,0 +1,15 @@
+
+    $(document).ready(function () {
+        $('#ProductCategoryId').change(function () {
+            $('#ProductSCategoryId option').remove();
+
+            $.getJSON('/SalesProduct/GetSubCatByAllCat/', { catId: $('#ProductCategoryId').val() }, function (data) {
+                $.each(data, function () {
+                    $('#ProductSCategoryId').append('<option value=' +
+                        this.SubCatId + '>' + this.SubCatName + '</option>');
+                });
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                alert('Error getting products!');
+            });
+        });
+    });
